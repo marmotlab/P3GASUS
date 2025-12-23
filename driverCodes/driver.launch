@@ -1,0 +1,4 @@
+<launch>
+   <node name="driver" pkg="marmot" type="driver.py" output="screen"/>
+   <!-- <node name="central" pkg="marmot" type="central.py" output="screen"/> -->
+</launch>

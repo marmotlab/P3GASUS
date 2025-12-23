@@ -1,0 +1,26 @@
+<launch>
+<arg name="robot_name" default="1" />\
+  <arg name="robot_color_r" default="0"/>
+  <arg name="robot_color_g" default="0"/>
+  <arg name="robot_color_b" default="1"/>
+  <arg name="robot_color_a" default="1.0"/>
+  <arg name="scenario" default="0"/>
+
+  <group ns="nexus$(arg robot_name)">
+    <param name="tf_prefix" value="nexus$(arg robot_name)" />
+      <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/robot.xacro robot_color_r:=$(arg robot_color_r) robot_color_g:=$(arg robot_color_g) robot_color_b:=$(arg robot_color_b) robot_color_a:=$(arg robot_color_a)"/>
+  </group>
+
+    <!-- If MAPF -->
+    <group if="$(eval arg('scenario') == 0)">
+        <group ns="nexus$(arg robot_name)_goal">
+            <param name="tf_prefix" value="nexus$(arg robot_name)_goal" />
+            <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/goal.xacro 
+                robot_color_r:=$(arg robot_color_r) 
+                robot_color_g:=$(arg robot_color_g) 
+                robot_color_b:=$(arg robot_color_b) 
+                robot_color_a:=$(arg robot_color_a)"/>
+        </group>
+    </group>
+
+</launch>

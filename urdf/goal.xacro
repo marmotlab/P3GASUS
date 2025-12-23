@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Pole">
+
+  <!-- Arguments for dynamic colors (RGBA) -->
+  <xacro:property name="robot_color_r" default="0"/>
+  <xacro:property name="robot_color_g" default="1"/>
+  <xacro:property name="robot_color_b" default="0"/>
+  <xacro:property name="robot_color_a" default="1.0"/>
+
+  <material name="dynamic_color"><color rgba="$(arg robot_color_r) $(arg robot_color_g) $(arg robot_color_b) $(arg robot_color_a)" /></material>
+
+  <link name="pole_footprint"/>
+  
+  <link name="pole_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.01" radius="0.15"/>
+      </geometry>
+      <material name="dynamic_color"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.0001" radius="0.0001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="0.015" iyy="0.0375" izz="0.0375" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="base_link_joint" type="fixed">
+    <parent link="pole_footprint"/>
+    <child link="pole_link"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+
+  <gazebo reference="pole_link">
+    <gravity>0</gravity>
+    <material>Gazebo/dynamic_color</material>
+  </gazebo>
+
+</robot>

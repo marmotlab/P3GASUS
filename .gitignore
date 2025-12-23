@@ -1,0 +1,8 @@
+.vscode
+fuel_models
+*__pycache__*
+debug/*
+scenarios/*
+recorded_rosbag/*
+rosbag*
+

@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<robot name="simple_robot"
+       xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="wheel_separation" value="0.070" />
+  <xacro:property name="wheel_radius" value="0.05" />
+  <xacro:property name="wheel_width" value="0.03" />
+  <xacro:property name="body_height" value="0.05" />
+  <xacro:property name="body_width" value="0.15" />
+  <xacro:property name="body_length" value="0.25" />
+
+  <!-- Arguments for dynamic colors (RGBA) -->
+  <xacro:property name="robot_color_r" default="0"/>
+  <xacro:property name="robot_color_g" default="1"/>
+  <xacro:property name="robot_color_b" default="0"/>
+  <xacro:property name="robot_color_a" default="1.0"/>
+
+  <material name="dynamic_color"><color rgba="$(arg robot_color_r) $(arg robot_color_g) $(arg robot_color_b) $(arg robot_color_a)" /></material>
+  <material name="Black"><color rgba="0.0 0.0 0.0 1.0" /></material>
+  
+
+  <!-- Base footprint -->
+  <link name="base_footprint"/>
+
+  <!-- Base link -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <!-- <xacro:include filename="$(find your_package_name)/urdf/colors.xacro" /> -->
+      <!-- Dynamic color -->
+      <material name="dynamic_color"/>
+        <!-- <color rgba="${robot_color_r} ${robot_color_g} ${robot_color_b} ${robot_color_a}"/> -->
+      <!-- </material> -->
+      <collision>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </collision>
+    </visual>
+  </link>
+
+  <!-- Wheel 1 -->
+  <link name="wheel1">
+    <visual>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- Wheel 2 -->
+  <link name="wheel2">
+    <visual>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+      <material name="Black" />
+
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- Wheel 3 -->
+  <link name="wheel3">
+    <visual>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+      <material name="Black" />
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- Wheel 4 -->
+  <link name="wheel4">
+    <visual>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+
+      </geometry>
+      <material name="Black" />
+
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- Joints -->
+  <joint name="base_link_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <joint name="wheel1_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="wheel1"/>
+    <origin xyz="${body_width/2} ${body_width/2 + wheel_width/2} -${body_height/2 - 0.01}" rpy="${pi/2} 0 0" /> 
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="wheel2_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="wheel2"/>
+    <origin xyz="-${body_width/2} ${body_width/2 + wheel_width/2} -${body_height/2 - 0.01}" rpy="${pi/2} 0 0" /> 
+
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="wheel3_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="wheel3"/>
+    <origin xyz="${body_width/2} -${body_width/2 + wheel_width/2} -${body_height/2 - 0.01}" rpy="${pi/2} 0 0" />
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="wheel4_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="wheel4"/>
+    <origin xyz="-${body_width/2} -${body_width/2 + wheel_width/2} -${body_height/2 - 0.01}" rpy="${pi/2} 0 0" />
+
+    <axis xyz="0 0 1"/>
+  </joint>
+
+<!-- All static links get collapsed down to base_link in Gazebo, so that's
+       the one to apply the colour to (in Gazebo 5+). -->
+  <gazebo reference="base_footprint">
+    <material>Gazebo/dynamic_color</material>
+    <gravity>true</gravity>
+  </gazebo>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/dynamic_color</material>
+  </gazebo>
+
+
+  <gazebo reference="upper_left_wheel_shaft">
+    <material>Gazebo/Black</material>
+  </gazebo>  
+
+  <gazebo reference="lower_left_wheel_shaft">
+    <material>Gazebo/Black</material>
+  </gazebo>  
+
+  <gazebo reference="upper_right_wheel_shaft">
+    <material>Gazebo/Black</material>
+  </gazebo>  
+
+  <gazebo reference="lower_right_wheel_shaft">
+    <material>Gazebo/Black</material>
+  </gazebo>  
+
+  <!-- Wheel friction to zero, as movement is handled by applying forces at the body level. -->
+  <gazebo reference="wheel1">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="wheel2">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="wheel3">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="wheel4">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+
+</robot>

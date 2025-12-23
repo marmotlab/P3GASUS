@@ -1,0 +1,58 @@
+<launch>
+  <arg name="robot_name" default="1" />
+  <arg name="real_robot_number" default="None" />
+  <arg name="robot_IP" default="None" />
+  <arg name="startX" default="6" />
+  <arg name="startY" default="1" />
+  <arg name="robot_color_r" default="0"/>
+  <arg name="robot_color_g" default="0"/>
+  <arg name="robot_color_b" default="1"/>
+  <arg name="robot_color_a" default="1.0"/>
+  <arg name="scenario" default="0"/>
+
+  <group ns="nexus$(arg robot_name)">
+    <param name="tf_prefix" value="nexus$(arg robot_name)" />
+      <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/robot.xacro robot_color_r:=$(arg robot_color_r) robot_color_g:=$(arg robot_color_g) robot_color_b:=$(arg robot_color_b) robot_color_a:=$(arg robot_color_a)"/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+    <!-- If MAPF -->
+    
+    <group if="$(eval arg('scenario') == 0)"> 
+        <node name="roboNode" pkg="marmot" type="MAPF_hybridController.py" output="screen" clear_params="true">
+        <param name="name" value="$(arg robot_name)" /> 
+        <param name="RealID" value="$(arg real_robot_number)" /> 
+        <param name="startX" value="$(arg startX)" /> 
+        <param name="startY" value="$(arg startY)" /> 
+        </node>
+    </group>
+
+    
+    <group if="$(eval arg('real_robot_number') != 'None')">
+        <node name="robotSSHnode" pkg="marmot" type="autossh.py" clear_params="true">
+            <param name="IP" value="$(arg robot_IP)" /> 
+        </node>
+    </group>
+    
+  </group>
+
+    <!-- If MAPF -->
+    <group if="$(eval arg('scenario') == 0)">
+        <group ns="nexus$(arg robot_name)_goal">
+            <param name="tf_prefix" value="nexus$(arg robot_name)_goal" />
+            <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/goal.xacro 
+                robot_color_r:=$(arg robot_color_r) 
+                robot_color_g:=$(arg robot_color_g) 
+                robot_color_b:=$(arg robot_color_b) 
+                robot_color_a:=$(arg robot_color_a)"/>
+
+            <node name="roboTFNode" pkg="marmot" type="spoofGoalTransform.py" output="screen" clear_params="true">
+            <param name="name" value="$(arg robot_name)" /> 
+            </node>
+            
+            <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+            
+        </group>
+    </group>
+
+</launch>

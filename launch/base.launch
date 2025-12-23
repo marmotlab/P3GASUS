@@ -1,0 +1,21 @@
+<launch>
+  <arg name="MapName" default="dynamic" />
+  <arg name="OptitrackToMapTransform_X" default="0" />
+  <arg name="OptitrackToMapTransform_Y" default="0" />
+  <arg name="LaunchOptitrack" default="false" />
+  <arg name="server" default="None"/>
+
+  <node pkg="map_server" type="map_server" name="map_broadcaster" args="$(find marmot)/map/$(arg MapName).yaml">
+    <param name="frame_id" value="map" />
+  </node>
+  
+  <node pkg="tf" type="static_transform_publisher" name="Optitrack_to_map"  args="$(arg OptitrackToMapTransform_X) $(arg OptitrackToMapTransform_Y) 0.07 0 0 0 /map /optitrack 100"/>
+
+  <group if="$(arg LaunchOptitrack)">
+    <include file="$(find marmot)/launch/vrpn.launch">
+      <arg name="server" value="$(arg server)" />
+    </include>
+  </group>
+
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find marmot)/rviz/dynamic_rviz.rviz" />
+</launch>

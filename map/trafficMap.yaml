@@ -1,0 +1,6 @@
+image: oneLane.jpg
+resolution: 0.02
+origin: [-0.475,-7.475, 0.000000]
+negate: 0
+occupied_thresh: 0.2
+free_thresh: 0.2
