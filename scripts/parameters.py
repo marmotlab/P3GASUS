@@ -1,6 +1,7 @@
 import numpy as np
 
 PATH_TO_P3GASUS_GRAPH_CREATION = "/media/marmot/Backup/TD/P3GASUS-graph-creation/"
+GRAPH_BINDINGS = "python"  # "python" or "cpp"
 
 class DriverParameters:
     SCENARIO = 1      # 0: MAPF, 1:Traffic
@@ -76,6 +77,3 @@ class TrafficParameters():
 
     MAX_ANG_VEL = 0.3
     MIN_ANG_VEL = 0.0001
-
-
-    

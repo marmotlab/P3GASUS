@@ -1,23 +1,103 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import copy
 import networkx as nx
-import networkx.algorithms.isomorphism as iso
-import lacam
 # from util import *
 import imageio
 
 from p3gasus.msg import TaskBroadcast, TaskAck
-import cv2
 import math
-import time
-import os
 import colorsys
-from parameters import PATH_TO_P3GASUS_GRAPH_CREATION
+from pathlib import Path
+from types import SimpleNamespace
+from parameters import GRAPH_BINDINGS, PATH_TO_P3GASUS_GRAPH_CREATION
 
 import sys
-sys.path.insert(0, PATH_TO_P3GASUS_GRAPH_CREATION)
-from discreteUtil import SAGE, MAGE, FORTED, OriginalADG
+GRAPH_CREATION_PATH = Path(PATH_TO_P3GASUS_GRAPH_CREATION).expanduser().resolve()
+GRAPH_BINDING_PATH = GRAPH_CREATION_PATH / "binding"
+sys.path.insert(0, str(GRAPH_CREATION_PATH))
+sys.path.insert(0, str(GRAPH_BINDING_PATH))
+
+
+def _normalize_binding_choice(value):
+    binding = str(value).strip().lower()
+    if binding not in {"python", "cpp"}:
+        raise ValueError("GRAPH_BINDINGS must be either 'python' or 'cpp'")
+    return binding
+
+
+def _task_from_dict(task):
+    return SimpleNamespace(
+        taskID=task["taskID"],
+        robotID=task["robotID"],
+        action=task["action"],
+        time=task["time"],
+        startPos=np.array(task["startPos"]),
+        goalPos=np.array(task["goalPos"]),
+    )
+
+
+class _CppADGAdapter:
+    _name = None
+
+    def __init__(self, cpp_graph):
+        self._cpp_graph = cpp_graph
+        self.graph = nx.DiGraph()
+        self.graph.add_nodes_from(cpp_graph.nodes())
+        self.graph.add_edges_from(cpp_graph.edges())
+        self.taskList = {
+            int(task_id): _task_from_dict(task)
+            for task_id, task in cpp_graph.task_list().items()
+        }
+        self.robotList = [_task_from_dict(task) for task in cpp_graph.robot_list()]
+
+    def fileWrite(self, path):
+        self._cpp_graph.file_write(path)
+
+
+def _load_cpp_adgs():
+    import p3gasus_discrete_cpp as cpp
+
+    def cpp_base_type(baseADG):
+        name = getattr(baseADG, "_name", getattr(baseADG, "__name__", ""))
+        if name == "OriginalADG":
+            return cpp.BaseADGType.BASE_ORIGINAL
+        if name == "SAGE":
+            return cpp.BaseADGType.BASE_SAGE
+        return cpp.BaseADGType.BASE_FORTED
+
+    class OriginalADG(_CppADGAdapter):
+        _name = "OriginalADG"
+
+        def __init__(self, taskList, startPositions):
+            super().__init__(cpp.OriginalADG(taskList, startPositions))
+
+    class SAGE(_CppADGAdapter):
+        _name = "SAGE"
+
+        def __init__(self, taskList, startPositions):
+            super().__init__(cpp.SAGE(taskList, startPositions))
+
+    class FORTED(_CppADGAdapter):
+        _name = "FORTED"
+
+        def __init__(self, taskList, startPositions):
+            super().__init__(cpp.FORTED(taskList, startPositions))
+
+    class MAGE(_CppADGAdapter):
+        _name = "MAGE"
+
+        def __init__(self, taskList, startPositions, baseADG=FORTED, filename="temp.dat"):
+            super().__init__(cpp.MAGE(taskList, startPositions, cpp_base_type(baseADG)))
+
+    return SAGE, MAGE, FORTED, OriginalADG
+
+
+BINDING_CHOICE = _normalize_binding_choice(GRAPH_BINDINGS)
+if BINDING_CHOICE == "cpp":
+    SAGE, MAGE, FORTED, OriginalADG = _load_cpp_adgs()
+else:
+    from discreteUtil import SAGE as PySAGE, MAGE as PyMAGE, FORTED as PyFORTED, OriginalADG as PyOriginalADG
+
+    SAGE, MAGE, FORTED, OriginalADG = PySAGE, PyMAGE, PyFORTED, PyOriginalADG
 
 def generateWarehouse(num_block=[-1,-1], length=40, shelfSize=5,lbRatio=2/3,freeSpaceRatio=1/3, shelfWidth=1):
     if(num_block[0]!=-1):
@@ -115,6 +195,8 @@ def getTriPoints( coord, scale):
     return  np.array([[int(math.floor(base[0]+scale/2)), base[1]], [base[0]+scale-1,base[1]+scale-1], [base[0], base[1]+scale-1]])    
 
 def renderWorld(scale=20, world = np.zeros(1),agents=[], goals=[], OFFSET=2):
+    import cv2
+
     size = world.shape
     numAgents = len(agents)
         
@@ -192,7 +274,7 @@ class PathPlanner:
                 
                 if(temp_.robotIDFrom == temp_.robotIDTo):
                     temp_.dependencyType = 1
-                elif(not isinstance(self.adg, (OriginalADG)) and task.action==task_.action):
+                elif(not self._is_original_adg() and task.action==task_.action):
                     temp_.dependencyType = 3
                 else:
                     temp_.dependencyType = 2
@@ -212,7 +294,7 @@ class PathPlanner:
                 
                 if(temp_.robotIDFrom == temp_.robotIDTo):
                     temp_.dependencyType = 1
-                elif(not isinstance(self.adg, (OriginalADG)) and task.action==task_.action):
+                elif(not self._is_original_adg() and task.action==task_.action):
                     temp_.dependencyType = 3
                 else:
                     temp_.dependencyType = 2
@@ -223,6 +305,9 @@ class PathPlanner:
             
             self.allTasks = allTasks
         print("Tasks ready to Broadcast")
+
+    def _is_original_adg(self):
+        return isinstance(self.adg, OriginalADG) or getattr(self.adg, "_name", None) == "OriginalADG"
 
     def hasCycle(self, graph):
         try:
@@ -295,6 +380,8 @@ class LACAM3(PathPlanner):
         super().__init__(WORLD, STARTS, GOALS, TIMEOUT, ADG_TYPE)
         
     def oneCase(self, world, STARTS, GOALS, TIMEOUT):
+        import lacam
+
         world = world.tolist()
         paths = lacam.solve(world, STARTS, GOALS, TIMEOUT)
         # print("Paths found: ", paths)

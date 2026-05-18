@@ -2,9 +2,9 @@
 
 [P3GASUS](https://ieeexplore.ieee.org/document/11282966) is a ROS-based framework for path execution in ultra-large-scale systems, supporting discrete multi-agent path finding (MAPF) and continuous traffic-style coordination.
 
-> **Note:** We are currently refactoring the ROS codebase. If you encounter any problems, please [raise an issue](https://github.com/p3gasuslab/P3GASUS/issues) and we'll address it promptly.
+> **Note:** We are currently refactoring the ROS codebase. If you encounter any problems, please [raise an issue](https://github.com/marmotlab/P3GASUS/issues) and we'll address it promptly.
 
-If you are only interested in the graph-creation algorithms, they are also available as a [standalone repository](https://github.com/p3gasuslab/P3GASUS-graph-creation).
+If you are only interested in the graph-creation algorithms, they are also available as a [standalone repository](https://github.com/marmotlab/P3GASUS-graph-creation).
 
 ## Dependencies
 
@@ -15,30 +15,46 @@ P3GASUS requires one of the following ROS 1 distributions:
 
 For discrete multi-agent path planning, P3GASUS uses [LACAM3](https://github.com/Kei18/lacam3/tree/pybind) (pybind branch). Pre-built bindings for Python 3.8 and 3.11 are included; other Python versions will require rebuilding the bindings.
 
+P3GASUS can build execution graphs with the Python implementation from `P3GASUS-graph-creation` or its faster C++/pybind11 bindings. The Python implementation is used by default.
+
 ## Installation
 
 Clone this repository into your catkin workspace and build:
 
 ```bash
 cd ~/catkin_ws/src
-git clone https://github.com/p3gasuslab/P3GASUS
+git clone https://github.com/marmotlab/P3GASUS
 cd ~/catkin_ws
 catkin_make
 ```
 
-Then set the path to the [P3GASUS-graph-creation](https://github.com/p3gasuslab/P3GASUS-graph-creation) repository in `scripts/parameters.py`:
+Then set the path to the [P3GASUS-graph-creation](https://github.com/marmotlab/P3GASUS-graph-creation) repository in `scripts/parameters.py`:
 
 ```python
 PATH_TO_P3GASUS_GRAPH_CREATION = "<your path>"
+GRAPH_BINDINGS = "python"  # "python" or "cpp"
 ```
 
 If you haven't cloned it yet:
 
 ```bash
-git clone https://github.com/p3gasuslab/P3GASUS-graph-creation
+git clone https://github.com/marmotlab/P3GASUS-graph-creation
 ```
 
 Then set the path as above.
+
+To use the C++ graph-construction bindings, build them in the graph-creation repository and switch `GRAPH_BINDINGS`:
+
+```bash
+cd <your path>/binding
+python setup.py build_ext --inplace
+```
+
+```python
+GRAPH_BINDINGS = "cpp"
+```
+
+The C++ option applies to discrete and continuous execution-graph construction. Discrete MAPF path generation still uses the LACAM3 Python binding.
 
 ## Quick Start
 
@@ -78,6 +94,7 @@ By default, the system starts in MAPF mode on a 10×10 open map with 8 robots. Y
 
 **General:**
 - `DriverParameters.SCENARIO` — set to `0` for discrete MAPF or `1` for continuous traffic.
+- `GRAPH_BINDINGS` — set to `"python"` for the reference graph builders or `"cpp"` for the pybind11 graph builders in `P3GASUS-graph-creation/binding`.
 - `HYBRID_ROBOT_COUNT` — number of robots in the environment.
 - `GROUP_COUNT` — number of parallel processing groups.
 - `REAL_WORLD_SIZE` — map extents.
@@ -115,4 +132,4 @@ By default, the system starts in MAPF mode on a 10×10 open map with 8 robots. Y
 
 ## Support
 
-If you encounter issues or have questions, please [open an issue](https://github.com/p3gasuslab/P3GASUS/issues) with a short description, your ROS version, and the steps to reproduce.
+If you encounter issues or have questions, please [open an issue](https://github.com/marmotlab/P3GASUS/issues) with a short description, your ROS version, and the steps to reproduce.

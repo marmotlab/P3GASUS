@@ -1,20 +1,79 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import networkx as nx
-import networkx.algorithms.isomorphism as iso
 
-from parameters import PATH_TO_P3GASUS_GRAPH_CREATION
-from sklearn.neighbors import KDTree
+from parameters import GRAPH_BINDINGS, PATH_TO_P3GASUS_GRAPH_CREATION
 import json
 from p3gasus.msg import TaskBroadcast, TaskAck
 
-import csv
 from scipy.signal import savgol_filter
+from pathlib import Path
+from types import SimpleNamespace
 import sys
 
 sys.setrecursionlimit(600000)
-sys.path.insert(0, PATH_TO_P3GASUS_GRAPH_CREATION)
-from continuousUtil import SAGE, MAGE, OriginalADG, jsonToNpy
+GRAPH_CREATION_PATH = Path(PATH_TO_P3GASUS_GRAPH_CREATION).expanduser().resolve()
+GRAPH_BINDING_PATH = GRAPH_CREATION_PATH / "binding"
+sys.path.insert(0, str(GRAPH_CREATION_PATH))
+sys.path.insert(0, str(GRAPH_BINDING_PATH))
+from continuousUtil import SAGE as PySAGE, MAGE as PyMAGE, OriginalADG as PyOriginalADG, jsonToNpy
+
+
+def _normalize_binding_choice(value):
+    binding = str(value).strip().lower()
+    if binding not in {"python", "cpp"}:
+        raise ValueError("GRAPH_BINDINGS must be either 'python' or 'cpp'")
+    return binding
+
+
+def _task_from_dict(task):
+    return SimpleNamespace(
+        taskID=task["taskID"],
+        robotID=task["robotID"],
+        time=task["time"],
+        startPos=np.array(task["startPos"]),
+        goalPos=np.array(task["goalPos"]),
+    )
+
+
+class _CppADGAdapter:
+    def __init__(self, cpp_graph):
+        self._cpp_graph = cpp_graph
+        self.THRESH = cpp_graph.threshold()
+        self.graph = nx.DiGraph()
+        self.graph.add_nodes_from(cpp_graph.nodes())
+        self.graph.add_edges_from(cpp_graph.edges())
+        self.taskList = {
+            int(task_id): _task_from_dict(task)
+            for task_id, task in cpp_graph.task_list().items()
+        }
+        self.robotList = [_task_from_dict(task) for task in cpp_graph.robot_list()]
+
+    def fileWrite(self, path):
+        self._cpp_graph.file_write(path)
+
+
+def _load_cpp_adgs():
+    import p3gasus_continuous_cpp as cpp
+
+    class OriginalADG(_CppADGAdapter):
+        def __init__(self, allPositions):
+            super().__init__(cpp.OriginalADG(allPositions))
+
+    class SAGE(_CppADGAdapter):
+        def __init__(self, allPositions=None):
+            super().__init__(cpp.SAGE(allPositions))
+
+    class MAGE(_CppADGAdapter):
+        def __init__(self, allPositions=None, filename="temp.dat"):
+            super().__init__(cpp.MAGE(allPositions))
+
+    return SAGE, MAGE, OriginalADG
+
+
+if _normalize_binding_choice(GRAPH_BINDINGS) == "cpp":
+    SAGE, MAGE, OriginalADG = _load_cpp_adgs()
+else:
+    SAGE, MAGE, OriginalADG = PySAGE, PyMAGE, PyOriginalADG
 
 class PathPlanner:
     def __init__(self, PATH, robotCount):
