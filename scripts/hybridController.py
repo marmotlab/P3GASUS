@@ -4,14 +4,14 @@ import rospy
 import numpy as np
 from geometry_msgs.msg import Twist 
 from nav_msgs.msg import Odometry
-from marmot.msg import Reset, Ack
+from p3gasus.msg import Reset, Ack
 import tf
 from std_msgs.msg import Int8
 from util import *
 from unifiedCommsUtil import *
 from parameters import *
 import json
-from discreteUtil import getCoord
+from discreteHelper import getCoord
 import copy
 
 RESOLUTION = DriverParameters.RESOLUTION

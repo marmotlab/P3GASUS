@@ -33,7 +33,7 @@
 
     <!-- A turtlebot symbol -->
     <include>
-      <uri>model://marmot_world</uri>
+      <uri>model://p3gasus_world</uri>
     </include>
 
     <scene>

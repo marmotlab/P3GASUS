@@ -1,7 +1,9 @@
 import numpy as np
 
+PATH_TO_P3GASUS_GRAPH_CREATION = "/media/marmot/Backup/TD/P3GASUS-graph-creation/"
+
 class DriverParameters:
-    SCENARIO = 0      # 0: MAPF, 1:Traffic
+    SCENARIO = 1      # 0: MAPF, 1:Traffic
     
     VIRTUAL_TO_REAL_ROBOT_MAPPING = {}
     # VIRTUAL_TO_REAL_ROBOT_MAPPING = {0:1,1:6,2:8,3:9, 4:11,5:2,6:7,7:5}

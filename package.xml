@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>marmot</name>
+  <name>p3gasus</name>
   <version>0.0.0</version>
-  <description>The marmot package</description>
+  <description>The p3gasus package</description>
 
   <maintainer email="td0013@todo.todo">td0013</maintainer>
   <license>TODO</license>

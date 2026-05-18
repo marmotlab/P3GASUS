@@ -8,14 +8,14 @@
 
   <group ns="nexus$(arg robot_name)">
     <param name="tf_prefix" value="nexus$(arg robot_name)" />
-      <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/robot.xacro robot_color_r:=$(arg robot_color_r) robot_color_g:=$(arg robot_color_g) robot_color_b:=$(arg robot_color_b) robot_color_a:=$(arg robot_color_a)"/>
+      <param name="robot_description" command="$(find xacro)/xacro $(find p3gasus)/urdf/robot.xacro robot_color_r:=$(arg robot_color_r) robot_color_g:=$(arg robot_color_g) robot_color_b:=$(arg robot_color_b) robot_color_a:=$(arg robot_color_a)"/>
   </group>
 
     <!-- If MAPF -->
     <group if="$(eval arg('scenario') == 0)">
         <group ns="nexus$(arg robot_name)_goal">
             <param name="tf_prefix" value="nexus$(arg robot_name)_goal" />
-            <param name="robot_description" command="$(find xacro)/xacro $(find marmot)/urdf/goal.xacro 
+            <param name="robot_description" command="$(find xacro)/xacro $(find p3gasus)/urdf/goal.xacro 
                 robot_color_r:=$(arg robot_color_r) 
                 robot_color_g:=$(arg robot_color_g) 
                 robot_color_b:=$(arg robot_color_b) 

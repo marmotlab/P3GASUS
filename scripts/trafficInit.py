@@ -2,11 +2,11 @@
 
 import rospy
 import numpy as np
-from marmot.msg import Reset, Ack
+from p3gasus.msg import Reset, Ack
 from geometry_msgs.msg import Point
-import discreteUtil
+import discreteHelper as discreteHelper
 import cv2
-import continuousUtil
+import continuousHelper as continuousHelper
 from unifiedCommsUtil import *
 from parameters import *
 from oneRun import GoalPosPubAck
@@ -40,7 +40,7 @@ GOALS = []
 if DriverParameters.SCENARIO == 0:
     WORLD = np.asarray(rospy.get_param("WORLD"), dtype=np.int64)
 ACK_TIMEOUT = 0.02
-allTasks = continuousUtil.PathPlanner(PATH, DriverParameters.HYBRID_ROBOT_COUNT).adg.taskList
+allTasks = continuousHelper.PathPlanner(PATH, DriverParameters.HYBRID_ROBOT_COUNT).adg.taskList
 # print(allTasks.taskList)
 realRobotTasks = {i: RealRobotTasks(i) for i in DriverParameters.VIRTUAL_TO_REAL_ROBOT_MAPPING}
 
@@ -192,7 +192,7 @@ GOALS = [[realRobotTasks[i].realStartPos.x, realRobotTasks[i].realStartPos.y] fo
 # print(STARTS)
 # print(GOALS)
 
-planner = discreteUtil.LACAM3(WORLD, STARTS, GOALS, ADG_TYPE=discreteUtil.Reduced_TD_Graph)
+planner = discreteHelper.LACAM3(WORLD, STARTS, GOALS, ADG_TYPE=discreteHelper.Reduced_TD_Graph)
 
 
 for idx, val in enumerate(planner.allTasks):

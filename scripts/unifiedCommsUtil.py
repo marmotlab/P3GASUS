@@ -5,10 +5,10 @@ import numpy as np
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist, PoseStamped, Point
 from parameters import *    
-from marmot.msg import Reset, Ack, TaskBroadcast, TaskAck
+from p3gasus.msg import Reset, Ack, TaskBroadcast, TaskAck
 from util import *
 import copy
-from discreteUtil import getCoord
+from discreteHelper import getCoord
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import tf
 import math

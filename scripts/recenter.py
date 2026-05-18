@@ -2,7 +2,7 @@
 
 import rospy
 import numpy as np
-from marmot.msg import Reset, Ack
+from p3gasus.msg import Reset, Ack
 from geometry_msgs.msg import Point
 from unifiedCommsUtil import *
 from parameters import *

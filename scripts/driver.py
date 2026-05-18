@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from util import *
 import roslaunch
 from parameters import *
-from discreteUtil import *
+from discreteHelper import *
 from roslaunch.core import Node
 import xacro
 import os
@@ -17,7 +17,7 @@ from datetime import datetime
 rospack = rospkg.RosPack()
 rospy.init_node('driverNode')
 
-PATH = rospack.get_path('marmot')
+PATH = rospack.get_path('p3gasus')
 rospy.set_param("PATH", PATH)
 
 realRobotCount = len(DriverParameters.VIRTUAL_TO_REAL_ROBOT_MAPPING)
@@ -152,12 +152,12 @@ partitioned_lists = [list(map(int, part)) for part in partitions]
 
 for i in range(DriverParameters.GROUP_COUNT):
     rospy.set_param("/group_"+str(i)+"/list_of_robots", partitioned_lists[i])
-    launch.launch(Node(package='marmot', node_type='groupController.py', name='group_controller', namespace="group_"+str(i) , output='screen'))
+    launch.launch(Node(package='p3gasus', node_type='groupController.py', name='group_controller', namespace="group_"+str(i) , output='screen'))
 
 
 for i in DriverParameters.VIRTUAL_TO_REAL_ROBOT_MAPPING.values():    
     rospy.set_param("/autosshNode_"+str(i)+"/ID", i)
-    launch.launch(Node(package='marmot', node_type='autossh.py', name='autoSSH', namespace="autosshNode_"+str(i) , output='screen'))
+    launch.launch(Node(package='p3gasus', node_type='autossh.py', name='autoSSH', namespace="autosshNode_"+str(i) , output='screen'))
 
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)

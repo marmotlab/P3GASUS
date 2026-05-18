@@ -1,4 +1,4 @@
-from discreteUtil import *
+from discreteHelper import *
 
 with open('../scenarios/MAPF/Sortation/sortation_large.map', 'r') as file:
     map = file.readlines()
@@ -15,5 +15,5 @@ for i, line in enumerate(map[4:]):
             world[i, j] = 0
     # print(i, line)
     
-plt.imsave("/media/marmot/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/Sortation/temp.png",renderWorld(50, world))
+plt.imsave("/media/p3gasus/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/Sortation/temp.png",renderWorld(50, world))
     

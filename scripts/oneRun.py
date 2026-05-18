@@ -2,15 +2,15 @@
 
 import rospy
 import numpy as np
-from marmot.msg import Reset, Ack, TaskBroadcast
+from p3gasus.msg import Reset, Ack, TaskBroadcast
 from geometry_msgs.msg import Point
-import discreteUtil
+import discreteHelper as discreteHelper
 import cv2
-import continuousUtil
+import continuousHelper as continuousHelper
 from unifiedCommsUtil import *
 from parameters import *
 import copy
-from discreteUtil import getCoord
+from discreteHelper import getCoord
 
 INTERACTIVE_GOAL_NUM = MAPFParameters.INTERACTIVE_GOAL_NUM
 PATH = rospy.get_param("PATH")
@@ -66,7 +66,7 @@ def getAndSetGoals():
     viewGOALS = []
     SCALE = 50
     for i in range(INTERACTIVE_GOAL_NUM):
-        selectedCell = cv2.selectROI("Select Goal", discreteUtil.renderWorld(scale = SCALE,world=-1*WORLD[:DriverParameters.REAL_WORLD_SIZE[0], :DriverParameters.REAL_WORLD_SIZE[1]], agents=viewStarts, goals=viewGOALS))[:2]
+        selectedCell = cv2.selectROI("Select Goal", discreteHelper.renderWorld(scale = SCALE,world=-1*WORLD[:DriverParameters.REAL_WORLD_SIZE[0], :DriverParameters.REAL_WORLD_SIZE[1]], agents=viewStarts, goals=viewGOALS))[:2]
         selectedCell = selectedCell[::-1]
         selectedCell = [i//SCALE for i in selectedCell]
         viewGOALS.append(selectedCell)
@@ -77,12 +77,12 @@ def getAndSetGoals():
     while(len(GOALS)!=DriverParameters.HYBRID_ROBOT_COUNT):
         try:
             DriverParameters.VIRTUAL_TO_REAL_ROBOT_MAPPING[len(GOALS)]
-            GOALS.append(discreteUtil.getFreeCell(GOALS, WORLD[:DriverParameters.REAL_WORLD_SIZE[0], :DriverParameters.REAL_WORLD_SIZE[1]]))
+            GOALS.append(discreteHelper.getFreeCell(GOALS, WORLD[:DriverParameters.REAL_WORLD_SIZE[0], :DriverParameters.REAL_WORLD_SIZE[1]]))
         except KeyError:
-            GOALS.append(discreteUtil.getFreeCell(GOALS, WORLD))
+            GOALS.append(discreteHelper.getFreeCell(GOALS, WORLD))
         
     goalPosPubAck.publishData([Reset(idx, Point(*getCoord((val[0], val[1]), DriverParameters.RESOLUTION),0)) for idx, val in enumerate(GOALS)])
-    planner = discreteUtil.LACAM3(WORLD, STARTS, GOALS, ADG_TYPE=discreteUtil.Reduced_TD_Graph, TIMEOUT=3)
+    planner = discreteHelper.LACAM3(WORLD, STARTS, GOALS, ADG_TYPE=discreteHelper.FORTED, TIMEOUT=3)
     
     if(DriverParameters.DEBUG):
         planner.adg.fileWrite(rospy.get_param("/debug_folder"))
@@ -120,10 +120,8 @@ if __name__=="__main__":
                 GOALS = GOALS[:DriverParameters.HYBRID_ROBOT_COUNT]
             
             goalPosPubAck.publishData([Reset(idx, Point(*getCoord((val[0], val[1]), DriverParameters.RESOLUTION),0)) for idx, val in enumerate(GOALS)])  
-            
-            # planner = discreteUtil.IMITATION(starts, actions, ADG_TYPE=discreteUtil.FullySynchGraph)
-            # planner = discreteUtil.IMITATION(starts, actions, ADG_TYPE=discreteUtil.NoSynchGraph)
-            planner = discreteUtil.IMITATION(starts, actions, ADG_TYPE=discreteUtil.Reduced_TD_Graph)
+
+            planner = discreteHelper.IMITATION(starts, actions, ADG_TYPE=discreteHelper.FORTED)
             
             if(DriverParameters.DEBUG):
                 planner.adg.fileWrite(rospy.get_param("/debug_folder"))
@@ -135,7 +133,7 @@ if __name__=="__main__":
         
 
     elif DriverParameters.SCENARIO == 1:
-        allTasks = continuousUtil.PathPlanner(PATH, DriverParameters.HYBRID_ROBOT_COUNT).allTasks
+        allTasks = continuousHelper.PathPlanner(PATH, DriverParameters.HYBRID_ROBOT_COUNT).allTasks
     
     tasksPubAck = TasksPubAck(ACK_TIMEOUT=ACK_TIMEOUT)
     

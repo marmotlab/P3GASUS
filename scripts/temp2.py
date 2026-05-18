@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from discreteUtil import *
+from discreteHelper import *
 from collections import Counter
 NumSteps = 500
 NumAgents = 200
@@ -30,7 +30,7 @@ def resolveCycles(starts, actions, method=TD_ADG):
 if __name__ == "__main__":
     print("Running cycle resolution...")
     for episode in range(0, 20):
-        Fname = "/media/marmot/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/log_"+str(episode)+".json"
+        Fname = "/media/p3gasus/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/log_"+str(episode)+".json"
 
         chunksize = 10**7  # Adjust the chunk size as needed
 
@@ -62,8 +62,8 @@ if __name__ == "__main__":
         starts, actions = resolveCycles(temp, temp2)
         print(episode, starts.shape, actions.shape)
         
-        np.save('/media/marmot/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/actions_'+str(episode)+'.npy', actions)
-        np.save('/media/marmot/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/starts_'+str(episode)+'.npy', starts)
+        np.save('/media/p3gasus/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/actions_'+str(episode)+'.npy', actions)
+        np.save('/media/p3gasus/Backup/catkin_ws/src/Tanishq_MAPF/scenarios/MAPF/log/starts_'+str(episode)+'.npy', starts)
         
         # adg = TD_ADG(actions, starts)
         # print(episode)

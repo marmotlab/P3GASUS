@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from marmot.msg import TaskBroadcast
+from p3gasus.msg import TaskBroadcast
 from unifiedCommsUtil import TasksPubAck
 
 rospy.init_node('newRun')

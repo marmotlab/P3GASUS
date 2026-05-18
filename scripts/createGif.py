@@ -1,4 +1,4 @@
-from discreteUtil import *
+from discreteHelper import *
 
 with open('../scenarios/MAPF/Warehouse/warehouse_large.map', 'r') as file:
     warehouse_map = file.readlines()
