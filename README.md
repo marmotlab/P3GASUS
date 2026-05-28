@@ -1,135 +1,226 @@
-# P3GASUS
+<h1 align="center">P3GASUS: Pre-Planned Path Execution Graphs for Multi-Agent Systems at Ultra-Large Scale</h1>
 
-[P3GASUS](https://ieeexplore.ieee.org/document/11282966) is a ROS-based framework for path execution in ultra-large-scale systems, supporting discrete multi-agent path finding (MAPF) and continuous traffic-style coordination.
+<div align="center">
 
-> **Note:** We are currently refactoring the ROS codebase. If you encounter any problems, please [raise an issue](https://github.com/marmotlab/P3GASUS/issues) and we'll address it promptly.
+[[Website]](https://marmotlab.github.io/P3GASUS/)
+[[Paper]](https://ieeexplore.ieee.org/document/11282966)
+[[Graph Creation Code]](https://github.com/marmotlab/P3GASUS-graph-creation)
 
-If you are only interested in the graph-creation algorithms, they are also available as a [standalone repository](https://github.com/marmotlab/P3GASUS-graph-creation).
+[![ROS](https://img.shields.io/badge/ROS-Melodic%20%7C%20Noetic-blue.svg)](https://www.ros.org/)
+[![Linux platform](https://img.shields.io/badge/Platform-linux--64-orange.svg)](https://ubuntu.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-## Dependencies
+<img src="docs/assets/P3GASUS.gif" width="90%"/>
 
-P3GASUS requires one of the following ROS 1 distributions:
+</div>
 
-- [ROS Melodic](https://wiki.ros.org/melodic/Installation/Ubuntu)
-- [ROS Noetic](https://wiki.ros.org/noetic/Installation/Ubuntu)
+---
 
-For discrete multi-agent path planning, P3GASUS uses [LACAM3](https://github.com/Kei18/lacam3/tree/pybind) (pybind branch). Pre-built bindings for Python 3.8 and 3.11 are included; other Python versions will require rebuilding the bindings.
+## Updates
 
-P3GASUS can build execution graphs with the Python implementation from `P3GASUS-graph-creation` or its faster C++/pybind11 bindings. The Python implementation is used by default.
+- [x] Release ROS execution framework
+- [x] Release standalone graph creation repository
+- [x] Release C++/Pybind version of graph creation
+- [x] Release project website
+<!-- - [x] Release discrete and continuous benchmark assets -->
+<!-- - [ ] Complete ROS codebase refactor -->
+
+## Overview
+
+[P3GASUS](https://ieeexplore.ieee.org/document/11282966) is a ROS-based framework for robust distributed execution of pre-planned paths in ultra-large multi-agent systems. It supports both discrete multi-agent path finding (MAPF) and continuous traffic-style coordination.
+
+P3GASUS introduces faster execution-graph builders for pre-planned multi-agent paths:
+
+- **SAGE:** builds ADG-equivalent execution graphs while avoiding exhaustive action-space search.
+- **MAGE:** removes redundant graph edges to reduce communication during execution.
+- **FORTED:** builds reduced discrete-space execution graphs in O(RT).
+
+If you only need the graph creation algorithms, use the standalone repository: [P3GASUS-graph-creation](https://github.com/marmotlab/P3GASUS-graph-creation).
+
+> **Note:** The ROS codebase is currently being refactored. If you encounter issues, please [open an issue](https://github.com/marmotlab/P3GASUS/issues).
+
+---
 
 ## Installation
 
-Clone this repository into your catkin workspace and build:
+Follow these steps to set up P3GASUS in a ROS 1 catkin workspace.
 
-```bash
-cd ~/catkin_ws/src
-git clone https://github.com/marmotlab/P3GASUS
-cd ~/catkin_ws
-catkin_make
-```
+1. **Install ROS 1:**
 
-Then set the path to the [P3GASUS-graph-creation](https://github.com/marmotlab/P3GASUS-graph-creation) repository in `scripts/parameters.py`:
+   P3GASUS requires one of the following ROS distributions:
 
-```python
-PATH_TO_P3GASUS_GRAPH_CREATION = "<your path>"
-GRAPH_BINDINGS = "python"  # "python" or "cpp"
-```
+   - [ROS Melodic](https://wiki.ros.org/melodic/Installation/Ubuntu)
+   - [ROS Noetic](https://wiki.ros.org/noetic/Installation/Ubuntu)
 
-If you haven't cloned it yet:
+2. **Clone this repository into your catkin workspace:**
 
-```bash
-git clone https://github.com/marmotlab/P3GASUS-graph-creation
-```
+   ```bash
+   cd ~/catkin_ws/src
+   git clone https://github.com/marmotlab/P3GASUS.git
+   ```
 
-Then set the path as above.
+3. **Build the ROS workspace:**
 
-To use the C++ graph-construction bindings, build them in the graph-creation repository and switch `GRAPH_BINDINGS`:
+   ```bash
+   cd ~/catkin_ws
+   catkin_make
+   source devel/setup.bash
+   ```
 
-```bash
-cd <your path>/binding
-python setup.py build_ext --inplace
-```
+4. **Clone the graph creation repository:**
 
-```python
-GRAPH_BINDINGS = "cpp"
-```
+   ```bash
+   cd ~
+   git clone https://github.com/marmotlab/P3GASUS-graph-creation.git
+   ```
 
-The C++ option applies to discrete and continuous execution-graph construction. Discrete MAPF path generation still uses the LACAM3 Python binding.
+5. **Configure P3GASUS paths and bindings:**
+
+   Edit [`scripts/parameters.py`](scripts/parameters.py):
+
+   ```python
+   PATH_TO_P3GASUS_GRAPH_CREATION = "<your path>/P3GASUS-graph-creation"
+   GRAPH_BINDINGS = "python"  # "python" or "cpp"
+   ```
+
+6. **Optional: build the faster C++ graph bindings:**
+
+   ```bash
+   cd <your path>/P3GASUS-graph-creation/binding
+   python setup.py build_ext --inplace
+   ```
+
+   Then switch the binding mode in [`scripts/parameters.py`](scripts/parameters.py):
+
+   ```python
+   GRAPH_BINDINGS = "cpp"
+   ```
+
+---
 
 ## Quick Start
 
-**Terminal 1 — Initialize:**
+**Terminal 1: initialize the driver**
 
 ```bash
 roslaunch p3gasus driver.py
 ```
 
-> **Note:** If you see an error about a non-executable file, make the relevant script executable first:
-> ```bash
-> chmod +x <filename.py>
-> ```
-
-**Terminal 2 — Run simulation:**
+**Terminal 2: run one simulation**
 
 ```bash
 rosrun p3gasus oneRun.py
 ```
 
-Configure your environment via `scripts/parameters.py` (see [Parameter Customization](#parameter-customization) below).
+If ROS reports that a script is not executable, run:
 
-## Modes & Hybrid Demo
+```bash
+chmod +x <filename.py>
+```
 
-P3GASUS supports purely simulated runs as well as a hybrid setup that couples simulated agents with real robots tracked by motion capture.
+---
 
-The hybrid demo uses an OptiTrack motion capture system and SparkFun mecanum-wheeled robots. The real-robot pipeline is tightly coupled to that hardware; if you use different robots or a different MoCap system, you will likely need to adapt topics, robot drivers, and network layout. The key parameters in [`scripts/parameters.py`](scripts/parameters.py) are:
+## Configuration
 
-- `VIRTUAL_TO_REAL_ROBOT_MAPPING` — maps virtual agent indices to physical robot IDs.
-- `OPTITRACK_TO_MAP_SHIFT` — aligns the MoCap coordinate frame with the map frame.
-- `VRPN_IP` — address of the OptiTrack VRPN server.
-- `ROS_MASTER_IP` / `REAL_ROBOT_IP` — ROS master and real-robot network addresses.
+Most experiment settings live in [`scripts/parameters.py`](scripts/parameters.py).
 
-## Parameter Customization
+Common options include:
 
-By default, the system starts in MAPF mode on a 10×10 open map with 8 robots. You can switch scenarios and tune behavior in [`scripts/parameters.py`](scripts/parameters.py).
+- `DriverParameters.SCENARIO`: set to `0` for discrete MAPF or `1` for continuous traffic.
+- `GRAPH_BINDINGS`: set to `"python"` or `"cpp"`.
+- `HYBRID_ROBOT_COUNT`: number of robots in the environment.
+- `GROUP_COUNT`: number of parallel processing groups.
+- `REAL_WORLD_SIZE`: map extents.
+- `DEBUG`: enable verbose logging.
 
-**General:**
-- `DriverParameters.SCENARIO` — set to `0` for discrete MAPF or `1` for continuous traffic.
-- `GRAPH_BINDINGS` — set to `"python"` for the reference graph builders or `"cpp"` for the pybind11 graph builders in `P3GASUS-graph-creation/binding`.
-- `HYBRID_ROBOT_COUNT` — number of robots in the environment.
-- `GROUP_COUNT` — number of parallel processing groups.
-- `REAL_WORLD_SIZE` — map extents.
-- `VRPN_IP`, `ROS_MASTER_IP`, `REAL_ROBOT_IP`, `VIRTUAL_TO_REAL_ROBOT_MAPPING` — networking and hardware configuration.
-- `DEBUG=True` — enable verbose logging.
-- `OPTITRACK_TO_MAP_SHIFT` — offset MoCap coordinates into the map frame.
+### Discrete MAPF
 
-### Discrete Space (MAPF)
+Discrete settings include:
 
-- `MAPFParameters.WORLD` — occupancy grid; `MAPFParameters.STARTS` — start/goal pairs (or use scenario loaders).
-- `SAFETY_DISTANCE` — collision buffer.
-- Virtual kinematics: `VIRTUAL_FAST_VEL`, `VIRTUAL_SLOW_VEL`, and associated thresholds.
-- Real kinematics: `REAL_FAST_VEL`, `REAL_SLOW_VEL`, `REAL_FAR_THRESHOLD`, `REAL_REACH_THRESHOLD`, `REAL_ANGULAR_VEL`, `ANGULAR_REACH_THRESHOLD`.
-- Imitation runs: enable `IMITATE=True`, set `IMITATE_FOLDER` to a recorded scenario, select robots with `IMITATION_LIST`, and cap replay length with `IMITATION_LENGTH`.
+- `MAPFParameters.WORLD`: occupancy grid.
+- `MAPFParameters.STARTS`: start and goal pairs.
+- `SAFETY_DISTANCE`: collision buffer.
+- `VIRTUAL_FAST_VEL`, `VIRTUAL_SLOW_VEL`: virtual robot velocity limits.
+- `REAL_FAST_VEL`, `REAL_SLOW_VEL`: real robot velocity limits.
 
-### Continuous Space (Traffic)
+For discrete multi-agent path planning, P3GASUS uses [LACAM3](https://github.com/Kei18/lacam3/tree/pybind). Pre-built bindings for Python 3.8 and 3.11 are included; other Python versions require rebuilding the bindings.
 
-- `TrafficParameters.ORIGIN` — map anchor point; `FUTURE_TASKS` — look-ahead task queue length.
-- Distance thresholds: `FAR_THRESHOLD`, `REACH_THRESHOLD`.
-- Virtual velocity window: `VIRTUAL_MIN_VEL` – `VIRTUAL_MAX_VEL`.
-- Real velocity caps: `REAL_SLOW_VEL`, `REAL_FAST_VEL`.
-- Angular behavior: `ANG_THRESHOLD`, `MAX_ANG_VEL`, `MIN_ANG_VEL`.
-- `SPEED_MULTIPLIER` — globally scales all traffic speeds.
+### Continuous Traffic
+
+Continuous settings include:
+
+- `TrafficParameters.ORIGIN`: map anchor point.
+- `FUTURE_TASKS`: look-ahead task queue length.
+- `FAR_THRESHOLD`, `REACH_THRESHOLD`: distance thresholds.
+- `VIRTUAL_MIN_VEL`, `VIRTUAL_MAX_VEL`: virtual velocity window.
+- `REAL_SLOW_VEL`, `REAL_FAST_VEL`: real robot velocity limits.
+- `SPEED_MULTIPLIER`: global speed scaling.
+
+---
+
+## Hybrid Real-Robot Demo
+
+P3GASUS supports hybrid execution with simulated agents and real robots tracked by motion capture.
+
+The included hardware pipeline was developed for an OptiTrack motion capture system and SparkFun mecanum-wheeled robots. If you use different hardware, you may need to adapt ROS topics, robot drivers, and network configuration.
+
+Relevant settings in [`scripts/parameters.py`](scripts/parameters.py):
+
+- `VIRTUAL_TO_REAL_ROBOT_MAPPING`: maps virtual agent indices to physical robot IDs.
+- `OPTITRACK_TO_MAP_SHIFT`: aligns the motion-capture frame with the map frame.
+- `VRPN_IP`: OptiTrack VRPN server address.
+- `ROS_MASTER_IP`, `REAL_ROBOT_IP`: ROS networking addresses.
+
+---
 
 ## Repository Structure
 
 | Directory | Contents |
 |-----------|----------|
-| `scripts/` | Main Python drivers, controllers, utilities, and `parameters.py` |
-| `launch/` | ROS launch files for the simulation and auxiliary nodes |
-| `map/` & `worlds/` | Example maps and Gazebo worlds used in experiments |
+| `scripts/` | Main Python drivers, controllers, utilities, and parameter configuration |
+| `launch/` | ROS launch files |
+| `map/` and `worlds/` | Example maps and Gazebo worlds |
 | `urdf/` | Robot and goal description files |
 | `msg/` | Custom ROS message definitions |
-| `rviz/` | RViz configurations for visualizing agents and maps |
+| `rviz/` | RViz visualization configurations |
+| `docs/` | GitHub Pages website |
+
+---
+
+## Website
+
+The project website is served from [`docs/`](docs/) through GitHub Pages:
+
+```text
+https://marmotlab.github.io/P3GASUS/
+```
+
+To preview it locally:
+
+```bash
+python docs/serve.py
+```
+
+---
+
+## Credit
+
+If you find this work useful, please consider citing:
+
+```bibtex
+@ARTICLE{11282966,
+  author={Duhan, Tanishq and He, Chengyang and Sartoretti, Guillaume},
+  journal={IEEE Robotics and Automation Letters},
+  title={P3GASUS: Pre-Planned Path Execution Graphs for Multi-Agent Systems at Ultra-Large Scale},
+  year={2026},
+  volume={11},
+  number={2},
+  pages={1274-1281},
+  keywords={Robots;Collision avoidance;Delays;Synchronization;Robot kinematics;Multi-agent systems;Time complexity;Standards;Global communication;Artificial intelligence;Distributed robot systems;path planning for multiple mobile robots;software architecture for robotics},
+  doi={10.1109/LRA.2025.3641121}
+}
+```
 
 ## Support
 
-If you encounter issues or have questions, please [open an issue](https://github.com/marmotlab/P3GASUS/issues) with a short description, your ROS version, and the steps to reproduce.
+For questions, bugs, or setup issues, please [open an issue](https://github.com/marmotlab/P3GASUS/issues) with your ROS version, Python version, and steps to reproduce.
