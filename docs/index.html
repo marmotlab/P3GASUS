@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>P3GASUS | Pre-Planned Path Execution Graphs</title>
+  <meta name="description"
+    content="P3GASUS is a framework for robust distributed execution of pre-planned paths in ultra-large multi-agent robot systems.">
+  <meta name="theme-color" content="#111111">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#">P3GASUS</a>
+      <div class="nav-links">
+        <a href="#experiments">Experiments</a>
+        <a href="#abstract">Abstract</a>
+        <a href="#visualizer">Data</a>
+        <a href="#benchmarks">Benchmarks</a>
+        <a href="#bibtex">BibTeX</a>
+      </div>
+      <div class="nav-resources" aria-label="Project resources">
+        <a href="https://ieeexplore.ieee.org/document/11282966" target="_blank" rel="noopener noreferrer"
+          aria-label="Paper on IEEE Xplore">
+          <span class="resource-icon text-icon">PDF</span>
+          <span>Paper</span>
+        </a>
+        <a href="https://github.com/marmotlab/P3GASUS" target="_blank" rel="noopener noreferrer"
+          aria-label="End-to-end ROS code">
+          <span class="resource-icon image-icon">
+            <img src="assets/GitHub_Invertocat_Black.svg" alt="">
+          </span>
+          <span>Code</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="teaser" aria-label="P3GASUS overview video">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="assets/Background.mp4" type="video/mp4">
+      </video>
+      <div class="teaser-copy">
+        <h1>P3GASUS</h1>
+        <p>Pre-Planned Path Execution Graphs for Multi-Agent Systems at Ultra-Large Scale</p>
+      </div>
+    </section>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="venue">IEEE Robotics and Automation Letters &middot; Accepted November 2025</p>
+        <h1>P3GASUS: Pre-Planned Path Execution Graphs for Multi-Agent Systems at Ultra-Large Scale</h1>
+        <div class="paper-meta">
+          <p class="authors">
+            <a href="https://www.tanishqduhan.com/" target="_blank" rel="noopener noreferrer">Tanishq
+              Duhan</a><sup>1</sup>,
+            <a href="https://scholar.google.com/citations?user=qMGSa1AAAAAJ&hl=en" target="_blank"
+              rel="noopener noreferrer">Chengyang
+              He</a><sup>1</sup>,
+            and <a href="https://www.marmotlab.org/bio.html" target="_blank" rel="noopener noreferrer">Guillaume
+              Sartoretti</a><sup>1</sup>
+          </p>
+          <p class="affiliations">
+            <sup>1</sup>Department of Mechanical Engineering, College of Design and Engineering,
+            National University of Singapore
+          </p>
+        </div>
+        <div class="button-row" aria-label="Project resources">
+          <a class="button primary" href="https://ieeexplore.ieee.org/document/11282966" target="_blank"
+            rel="noopener noreferrer">Paper</a>
+          <a class="button" href="https://github.com/marmotlab/P3GASUS" target="_blank"
+            rel="noopener noreferrer">Code - End to End (ROS)</a>
+          <a class="button" href="https://github.com/marmotlab/P3GASUS-graph-creation" target="_blank"
+            rel="noopener noreferrer">Code - Graph Creation</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="experiments" class="section">
+      <div class="section-heading">
+        <h2>Robot Experiments</h2>
+        <p>Discrete and continuous teams execute pre-planned paths with distributed dependency checks.</p>
+      </div>
+      <div class="video-grid">
+        <figure class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="assets/DiscreteSpace-RealRobots.mp4" type="video/mp4">
+          </video>
+          <figcaption>Discrete-space real-robot execution.</figcaption>
+        </figure>
+        <figure class="video-card">
+          <video controls playsinline preload="metadata">
+            <source src="assets/ContinuousSpace-RealRobots.mp4" type="video/mp4">
+          </video>
+          <figcaption>Continuous-space real-robot execution.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="abstract" class="section">
+      <h2>Abstract</h2>
+      <div class="text-columns">
+        <p>
+          Executing pre-planned paths in multi-agent systems is challenging, as a lack of synchronization can lead to
+          collisions or live-/deadlocks, while enforcing strict synchronization may cause a widespread team delay in
+          reaching goals. An Action Dependency Graph (ADG) solves this problem by identifying and synchronizing only the
+          necessary robots during execution by post-processing all agents' paths into a static directed graph with
+          actions as nodes and edges representing the execution precedence order between actions. However, ADG's
+          creation phase currently requires an exhaustive search of the action space that inflates both computation and
+          communication (O(R2 T2), where R is the number of robots and T is the maximum path length). This makes ADG the
+          bottleneck for current state-of-the-art MAPF planners, which can solve for up to 10000 agents, and lifelong
+          MAPF, which needs constant replanning during execution. Moreover, this biquadratic scaling also limits the
+          extension of ADG to continuous space scenarios, where high-frequency updates typically effectively result in
+          long path lengths. Addressing these limitations, in this work, we propose three improved execution graphs to
+          cater to different needs and scenarios: SAGE, which adds edges based on the sequence in which robots visit a
+          position; MAGE, which takes the execution graph of SAGE as input and prunes its redundant edges, reducing
+          communication burden during execution; and FORTED which combines both approaches with a reduced complexity of
+          O(RT), making it the overall best in discrete scenarios, trading-off scalability to continuous space
+          scenarios. All three methods achieve speedups of 300-8000 folds over ADG, with MAGE and FORTED reducing
+          communication overhead by more than 14 times. By integrating these methods with a framework for robust
+          distributed path execution for both discrete and continuous scenarios, we introduce P3GASUS, an end-to-end
+          method for pre-planned path execution in multi-agent systems.
+        </p>
+      </div>
+    </section>
+
+    <section id="visualizer" class="section">
+      <div class="section-heading">
+        <h2>Interactive Results</h2>
+        <p>Explore the timing and communication CSVs directly from the project assets.</p>
+      </div>
+      <div class="results-panel">
+        <div class="chart-controls" aria-label="Result chart controls">
+          <label>
+            Dataset
+            <select id="dataset-select"></select>
+          </label>
+          <label>
+            Metric
+            <select id="metric-select"></select>
+          </label>
+          <label>
+            Scale
+            <select id="scale-select">
+              <option value="linear">Linear</option>
+              <option value="log">Log</option>
+            </select>
+          </label>
+        </div>
+        <fieldset class="method-controls">
+          <legend>Methods</legend>
+          <div id="method-checkboxes" class="method-checkboxes"></div>
+        </fieldset>
+        <div class="chart-wrap">
+          <svg id="results-chart" role="img" aria-label="Interactive P3GASUS result chart"></svg>
+          <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+        </div>
+        <div class="chart-footer">
+          <p id="chart-caption"></p>
+          <div id="chart-legend" class="chart-legend" aria-label="Chart legend"></div>
+        </div>
+        <div class="table-scroll">
+          <table id="summary-table" class="summary-table"></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="benchmarks" class="section">
+      <div class="section-heading">
+        <h2>Benchmark Snapshots</h2>
+        <p>Method-level exports for SAGE, MAGE, and FORTED.</p>
+      </div>
+      <div class="benchmark-grid method-snapshots">
+        <figure class="media-card">
+          <img src="assets/SAGE.jpg" alt="SAGE benchmark visualization" loading="lazy" decoding="async">
+          <figcaption>SAGE</figcaption>
+        </figure>
+        <figure class="media-card">
+          <img src="assets/MAGE.png" alt="MAGE benchmark visualization" loading="lazy" decoding="async">
+          <figcaption>MAGE</figcaption>
+        </figure>
+        <figure class="media-card">
+          <img src="assets/FORTED.png" alt="FORTED benchmark visualization" loading="lazy" decoding="async">
+          <figcaption>FORTED</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="bibtex" class="section narrow">
+      <h2>BibTeX</h2>
+      <pre><code>@ARTICLE{11282966,
+  author={Duhan, Tanishq and He, Chengyang and Sartoretti, Guillaume},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={P3GASUS: Pre-Planned Path Execution Graphs for Multi-Agent Systems at Ultra-Large Scale}, 
+  year={2026},
+  volume={11},
+  number={2},
+  pages={1274-1281},
+  keywords={Robots;Collision avoidance;Delays;Synchronization;Robot kinematics;Multi-agent systems;Time complexity;Standards;Global communication;Artificial intelligence;Distributed robot systems;path planning for multiple mobile robots;software architecture for robotics},
+  doi={10.1109/LRA.2025.3641121}}
+</code></pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>P3GASUS &middot; Marmot Lab, National University of Singapore</p>
+  </footer>
+  <script src="scripts/results.js" defer></script>
+</body>
+
+</html>
